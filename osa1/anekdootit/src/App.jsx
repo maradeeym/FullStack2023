@@ -41,5 +41,5 @@ const App = () => {
     </div>
   )
 } 
-//pierkale
+
 export default App
