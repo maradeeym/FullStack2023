@@ -83,7 +83,7 @@ const addNote = (event) => {
     //console.log(event.target.value)
     setShowAll(event.target.value)
   }
-
+//this is tapahtumankäsittelijä
   const handleDelete = id => {
     const person = persons.find(p => p.id === id);
     const confirmed = window.confirm(`Are you sure you want to delete ${person.name}?`);

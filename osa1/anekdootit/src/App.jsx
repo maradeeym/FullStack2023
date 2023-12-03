@@ -40,6 +40,6 @@ const App = () => {
     <p>has {votes[mostVotedAnecdoteIndex]} votes</p>
     </div>
   )
-}  
-
+} 
+//pierkale
 export default App
