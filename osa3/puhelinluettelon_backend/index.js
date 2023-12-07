@@ -5,6 +5,7 @@ const cors = require('cors')
 
 app.use(express.json()); // Parse JSON request bodies
 app.use(cors())
+app.use(express.static('dist')) //tarkastaa Express GET-tyyppisten HTTP-pyyntöjen yhteydessä ensin löytyykö pyynnön polkua vastaavan nimistä tiedostoa hakemistosta dist. Jos löytyy, palauttaa Express tiedoston.
 
 // Define a custom token for logging POST request data
 morgan.token('post-data', (req) => {
