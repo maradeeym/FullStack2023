@@ -1,9 +1,10 @@
 const express = require('express')
 const morgan = require('morgan')
 const app = express()
-
+const cors = require('cors')
 
 app.use(express.json()); // Parse JSON request bodies
+app.use(cors())
 
 // Define a custom token for logging POST request data
 morgan.token('post-data', (req) => {
