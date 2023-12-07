@@ -1,7 +1,21 @@
 const express = require('express')
+const morgan = require('morgan')
 const app = express()
 
-app.use(express.json())
+
+app.use(express.json()); // Parse JSON request bodies
+
+// Define a custom token for logging POST request data
+morgan.token('post-data', (req) => {
+  if (req.method === 'POST') {
+    return JSON.stringify(req.body);
+  }
+  return ''; // Return empty string for non-POST requests
+});
+
+// Use Morgan with the custom token
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :post-data'));
+
 
 let persons = [
     { 
@@ -95,3 +109,7 @@ let persons = [
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
   })
+
+  morgan('tiny')
+
+  //kohdassa 3.6
