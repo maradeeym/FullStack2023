@@ -114,4 +114,4 @@ let persons = [
 
   morgan('tiny')
 
-  //kohdassa 3.6
+  //pieeru
