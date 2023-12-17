@@ -26,8 +26,9 @@ if (process.argv.length === 3) {
     // Print the database
     Person.find({})
         .then(persons => {
+            console.log("phonebook:");
             persons.forEach(person => {
-                console.log(person);
+                console.log(person.name + " " + person.number);
             });
             mongoose.connection.close();
         });
