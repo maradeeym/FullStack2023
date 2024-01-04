@@ -7,10 +7,6 @@ mongoose.set('strictQuery', false)
 
 const url = process.env.MONGODB_URI;
 
-
-//process.env.MONGODB_URI
-//mongodb+srv://serkkupoika:serkkupoika@cluster0.sgksjwl.mongodb.net/puhelinluettelo?retryWrites=true&w=majority
-
 console.log('connecting to', url)
 mongoose.connect(url)
 .then(result => {

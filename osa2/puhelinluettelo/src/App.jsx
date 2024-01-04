@@ -30,28 +30,32 @@ const App = () => {
 //this sends the data when the button is clicked
 const addNote = (event) => {
   event.preventDefault();
-  const personWithSameNumber = persons.find(p => p.number === newNumber);
+  const personWithSameName = persons.find(p => p.name === newName);
   const newPerson = {
     name: newName,
     number: newNumber
   };
 
-  if (personWithSameNumber) {
-    const confirmed = window.confirm(`The number ${newNumber} is already in the phone book, would you like to replace the name associated with this number?`);
+  if (personWithSameName) {
+    const confirmed = window.confirm(`${newName} is already in the phone book, would you like to update the number associated with this name?`);
     if (confirmed) {
       personsService
-        .update(personWithSameNumber.id, newPerson)
+        .update(personWithSameName.id, { ...personWithSameName, number: newNumber })
         .then(updatedPerson => {
-          setPersons(persons.map(p => p.id !== personWithSameNumber.id ? p : updatedPerson));
+          setPersons(persons.map(p => p.id !== personWithSameName.id ? p : updatedPerson));
           setAddMessage(`Updated ${newName}'s number successfully.`);
+          setAddMessageType('success');
           setTimeout(() => {
             setAddMessage(null);
           }, 5000);
         })
-        
         .catch(error => {
           console.error('Error updating person:', error);
-          // Handle the error appropriately
+          setAddMessageType('error');
+          setAddMessage(`Failed to update ${newName}'s number. It might have been removed from the server.`);
+          setTimeout(() => {
+            setAddMessage(null);
+          }, 5000);
         });
     }
   } else {
@@ -59,17 +63,26 @@ const addNote = (event) => {
       .create(newPerson)
       .then(returnedPerson => {
         setPersons(persons.concat(returnedPerson));
-      });
-      setAddMessage(`Added ${newName} successfully.`);
+        setAddMessage(`Added ${newName} successfully.`);
+        setAddMessageType('success');
         setTimeout(() => {
           setAddMessage(null);
-        }, 2500)
+        }, 2500);
+      })
+      .catch(error => {
+        console.error('Error adding new person:', error);
+        setAddMessageType('error');
+        setAddMessage(`Failed to add ${newName}.`);
+        setTimeout(() => {
+          setAddMessage(null);
+        }, 5000);
+      });
   }
 
   setNewName('');
   setNewNumber('');
 };
-  
+
 // tapahtumankäsittelijä: this updates the value of input in realtime
   const handleNameChange = (event) => {
     //console.log(event.target.value)
