@@ -1,11 +1,14 @@
 const express = require('express')
-const morgan = require('morgan')
+const morgan = require('morgan');
+const requestLogger = morgan('dev');
 const app = express()
 const cors = require('cors')
+const Person = require('./models/person')
 
+app.use(express.static('dist')) //tarkastaa Express GET-tyyppisten HTTP-pyyntöjen yhteydessä ensin löytyykö pyynnön polkua vastaavan nimistä tiedostoa hakemistosta dist. Jos löytyy, palauttaa Express tiedoston.
 app.use(express.json()); // Parse JSON request bodies
 app.use(cors())
-app.use(express.static('dist')) //tarkastaa Express GET-tyyppisten HTTP-pyyntöjen yhteydessä ensin löytyykö pyynnön polkua vastaavan nimistä tiedostoa hakemistosta dist. Jos löytyy, palauttaa Express tiedoston.
+app.use(requestLogger)
 
 // Define a custom token for logging POST request data
 morgan.token('post-data', (req) => {
@@ -17,53 +20,6 @@ morgan.token('post-data', (req) => {
 
 // Use Morgan with the custom token
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :post-data'));
-
-const mongoose = require('mongoose')
-
-// ÄLÄ KOSKAAN TALLETA SALASANOJA GitHubiin!
-const url =
-  `mongodb+srv://serkkupoika:serkkupoika@cluster0.sgksjwl.mongodb.net/puhelinluettelo?retryWrites=true&w=majority`
-
-mongoose.set('strictQuery', false)
-mongoose.connect(url)
-
-const personSchema = new mongoose.Schema({
-  name: String,
-  number: String,
-})
-
-personSchema.set('toJSON', {
-  transform: (document, returnedObject) => {
-    returnedObject.id = returnedObject._id.toString()
-    delete returnedObject._id
-    delete returnedObject.__v
-  }
-})
-
-const Person = mongoose.model('Person', personSchema)
-
-let persons = [
-    { 
-      name: 'Arto Hellas', 
-      number: '040-123456',
-      id: 1
-    },
-    { 
-      name: 'Ada Lovelace', 
-      number: '39-44-5323523',
-      id: 2
-    },
-    { 
-      name: "Dan Abramov", 
-      number: '12-43-234345',
-      id: 3
-    },
-    { 
-      name: "Mary Poppendieck", 
-      number: '39-23-6423122',
-      id: 4
-    }
-  ]
 
   app.get('/api/persons', (request, response) => {
     Person.find({}).then(persons => {
@@ -89,46 +45,86 @@ app.get('/api/persons/:id', (req, res) => {
         res.status(404).send('Person not found'); // If no person found, send 404
       }
     })
-    .catch(error => res.status(400).send(error.message)); // Handle possible errors
+    .catch(error => next(error))
 });
 
 
   app.delete('/api/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
-    persons = persons.filter(person => person.id !== id)
-  
-    response.status(204).end()
-  })
+    Person.findByIdAndDelete(request.params.id)
+    .then(result => {
+      response.status(204).end()
+    })
+    .catch(error => next(error))
+})
 
-  app.post('/api/persons', (request, response) => {
-    const { name, number } = request.body;
-  
-    // Simple validation for name and number
-    if (!name || !number) {
+app.put('/api/persons/:id', (request, response, next) => {
+  const { id } = request.params;
+  const { number } = request.body;
+
+  // Simple validation for number
+  if (!number) {
+      return response.status(400).json({ error: 'New number is required.' });
+  }
+
+  const update = { number: number };
+
+  // Find the person by ID and update their number
+  Person.findByIdAndUpdate(id, update, { new: true })
+      .then(updatedPerson => {
+          if (!updatedPerson) {
+              return response.status(404).json({ error: 'Person not found.' });
+          }
+          response.status(200).json(updatedPerson);
+      })
+      .catch(error => next(error));
+});
+
+
+
+app.post('/api/persons', (request, response, next) => {
+  const { name, number } = request.body;
+
+  // Simple validation for name and number
+  if (!name || !number) {
       return response.status(400).json({ error: 'The name and number are required.' });
+  }
+
+  // Check if the name already exists in the database
+  Person.findOne({ name: name })
+      .then(existingPerson => {
+          if (existingPerson) {
+              console.log('Name must be unique.');
+              return response.status(400).json({ error: 'Name must be unique.' });
+          }
+
+          // Create a new person object with the request body
+          const newPerson = new Person({
+              name, // Name from the request body
+              number, // Number from the request body
+          });
+
+          // Save the new person to the database
+          newPerson.save()
+              .then(savedPerson => {
+                  response.status(201).json(savedPerson);
+              })
+              .catch(error => next(error)); // Pass errors to Express's default error handler
+      })
+      .catch(error => next(error)); // Error handling for findOne
+});
+
+  const errorHandler = (error, request, response, next) => {
+    console.error(error.message)
+  
+    if (error.name === 'CastError') {
+      return response.status(400).send({ error: 'malformatted id' })
     }
   
-    // Check if the name already exists in the database
-    Person.findOne({ name: name }).then(existingPerson => {
-      if (existingPerson) {
-        console.log('Name must be unique.')
-        return response.status(400).json({ error: 'Name must be unique.' });
-      }
+    next(error)
+  }
   
-      // Create a new person object with the request body
-      const newPerson = new Person({
-        name, // Name from the request body
-        number, // Number from the request body
-      });
-  
-      // Save the new person to the database
-      newPerson.save()
-        .then(savedPerson => {
-          response.status(201).json(savedPerson);
-        })
-        .catch(error => response.status(400).json({ error: error.message }));
-    });
-  });
+  // tämä tulee kaikkien muiden middlewarejen rekisteröinnin jälkeen!
+  app.use(errorHandler)
   
 
   
