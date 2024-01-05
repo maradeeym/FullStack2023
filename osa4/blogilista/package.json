@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "push": "git add . && git commit -m 'x' && git push"
   },
   "author": "mara",
   "license": "MIT",
