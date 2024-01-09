@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react'
 import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
+import Notification from './components/Notification';
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
-  const [errorMessage, setErrorMessage] = useState(null)
+  const [notificationMessage, setNotificationMessage] = useState(null);
+  const [notificationType, setNotificationType] = useState(null); // 'success' or 'error'
   const [username, setUsername] = useState('') 
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
@@ -33,21 +35,20 @@ const App = () => {
 
   const handleLogin = async (event) => {
     event.preventDefault()
-    console.log('logging in with', username, password)
-    
     try {
       const user = await loginService.login({ username, password });
 
       window.localStorage.setItem('loggedBlogappUser', JSON.stringify(user));
-    
       setUser(user);
-      setUsername('')
-      setPassword('')
+      setUsername('');
+      setPassword('');
+      setNotificationMessage('Login successfully');
+      setNotificationType('added');
+      setTimeout(() => setNotificationMessage(null), 5000);
     } catch (exception) {
-      setErrorMessage('wrong credentials')
-      setTimeout(() => {
-        setErrorMessage(null)
-      }, 5000)
+      setNotificationMessage('Wrong credentials');
+      setNotificationType('error');
+      setTimeout(() => setNotificationMessage(null), 5000);
     }
   }
 
@@ -71,13 +72,17 @@ const App = () => {
   
       const returnedBlog = await blogService.create(newBlogObject);
       setBlogs(blogs.concat(returnedBlog));
+      setNotificationMessage('Blog added');
+      setNotificationType('added');
+      setTimeout(() => setNotificationMessage(null), 5000);
       setNewBlogTitle(''); // Clear the title input field
       setNewBlogAuthor(''); // Clear the author input field
       setNewBlogUrl(''); // Clear the url input field
       // Optional: Display a success message
     } catch (exception) {
-      setErrorMessage('Error adding blog');
-      setTimeout(() => setErrorMessage(null), 5000);
+      setNotificationMessage('Something went wrong');
+      setNotificationType('error');
+      setTimeout(() => setNotificationMessage(null), 5000);
     }
   };
   
@@ -145,6 +150,7 @@ if (user === null) {
   return (
     <div>
       <h2>Log in to application</h2>
+      <Notification message={notificationMessage} type={notificationType} />
       {loginForm()}
     </div>
   );
@@ -153,6 +159,7 @@ if (user === null) {
 return (
   <div>      
     <h2>Blogs</h2>
+    <Notification message={notificationMessage} type={notificationType} />
     <p>{user.username} logged in</p>
     <button onClick={handleLogout}>Logout</button> {/* Logout button */}
     {blogForm()}
