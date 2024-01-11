@@ -3,7 +3,7 @@ import userService from '../services/users'; // Adjust the path as needed
 import blogService from '../services/blogs'
 
 
-const Blog = ({ blog, onLikeUpdate }) => {
+const Blog = ({ blog, onLikeUpdate, onBlogDelete }) => {
   const [showDetails, setShowDetails] = useState(false);
   const [blogUser, setBlogUser] = useState(null);
   const [likes, setLikes] = useState(blog.likes);
@@ -51,6 +51,12 @@ const Blog = ({ blog, onLikeUpdate }) => {
       });
   };
 
+  const handleDelete = () => {
+    if (window.confirm(`Are you sure you want to delete the blog: "${blog.title}" by ${blog.author}?`)) {
+      onBlogDelete(blog.id);
+    }
+  };
+
   return (
     <div style={blogStyle}>
       <div>
@@ -64,6 +70,7 @@ const Blog = ({ blog, onLikeUpdate }) => {
           <p>URL: <a href={blog.url}>{blog.url}</a></p>
           <p>Likes: {likes} <button onClick={handleLike}>Like</button></p>
           {blogUser && <p>Added by: {blogUser.username}</p>}
+          <button onClick={handleDelete}>Delete</button>
         </div>
       )}
     </div>  

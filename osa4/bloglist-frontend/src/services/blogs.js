@@ -33,6 +33,12 @@ const create = async newBlog => {
   return response.data;
 };
 
-// Add other methods (update, delete) as needed
+const remove = id => {
+  const config = {
+    headers: { Authorization: token },
+  };
 
-export default { getAll, create, setToken, update };
+  return axios.delete(`${baseUrl}/${id}`, config);
+};
+
+export default { getAll, create, setToken, update, remove };

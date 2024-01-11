@@ -70,6 +70,17 @@ const App = () => {
       .sort((a, b) => b.likes - a.likes)); // Re-sort blogs after update
   };
 
+  const onBlogDelete = (id) => {
+    blogService.remove(id)
+      .then(() => {
+        setBlogs(blogs.filter(blog => blog.id !== id));
+      })
+      .catch(error => {
+        console.error('Error deleting blog:', error);
+        // Handle error (e.g., show notification)
+      });
+  };
+
   const addBlog = async (event) => {
     event.preventDefault();
   
@@ -140,7 +151,7 @@ return (
         )}
 
           {blogs.map(blog => (
-            <Blog key={blog.id} blog={blog} onLikeUpdate={onLikeUpdate} />
+            <Blog key={blog.id} blog={blog} onLikeUpdate={onLikeUpdate} onBlogDelete={onBlogDelete}/>
           ))}
       </>
     )}
