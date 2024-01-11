@@ -3,7 +3,7 @@ import userService from '../services/users'; // Adjust the path as needed
 import blogService from '../services/blogs'
 
 
-const Blog = ({ blog, updateLikes }) => {
+const Blog = ({ blog, onLikeUpdate }) => {
   const [showDetails, setShowDetails] = useState(false);
   const [blogUser, setBlogUser] = useState(null);
   const [likes, setLikes] = useState(blog.likes);
@@ -33,6 +33,7 @@ const Blog = ({ blog, updateLikes }) => {
     marginBottom: 5
   };
 
+
   const toggleDetails = () => {
     setShowDetails(!showDetails);
   };
@@ -43,7 +44,7 @@ const Blog = ({ blog, updateLikes }) => {
 
     blogService.update(blog.id, { ...blog, likes: updatedLikes })
       .then(updatedBlog => {
-        console.log('Likes updated:', updatedBlog.likes);
+        onLikeUpdate(updatedBlog); // Inform the parent component
       })
       .catch(error => {
         console.error('Error updating likes:', error);
