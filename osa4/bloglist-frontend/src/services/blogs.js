@@ -14,6 +14,16 @@ const getAll = async () => {
   return response.data;
 };
 
+const update = (id, newBlog) => {
+  console.log("Making PUT request to:", `${baseUrl}/${id}`); // Log the URL
+  const config = {
+    headers: { Authorization: token },
+  };
+
+  return axios.put(`${baseUrl}/${id}`, newBlog, config)
+    .then(response => response.data);
+};
+
 const create = async newBlog => {
   const config = {
     headers: { Authorization: token },
@@ -25,4 +35,4 @@ const create = async newBlog => {
 
 // Add other methods (update, delete) as needed
 
-export default { getAll, create, setToken };
+export default { getAll, create, setToken, update };
