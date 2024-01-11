@@ -39,6 +39,27 @@ blogsRouter.post('/', async (request, response) => {
   }
 })
 
+blogsRouter.put('/:id', async (request, response) => {
+    const { likes } = request.body; // Destructure likes from the request body
+  
+    try {
+      const blog = await Blog.findById(request.params.id);
+      if (!blog) {
+        return response.status(404).json({ error: 'blog not found' });
+      }
+  
+      // Update the likes
+      blog.likes = likes;
+  
+      // Save the updated blog and return it
+      const updatedBlog = await blog.save();
+      response.json(updatedBlog);
+    } catch (error) {
+      console.error('Error updating blog:', error);
+      response.status(400).json({ error: 'malformatted id or other error' });
+    }
+  });
+
 blogsRouter.delete('/:id', async (request, response) => {
     try {
       const decodedToken = jwt.verify(request.token, process.env.SECRET);
