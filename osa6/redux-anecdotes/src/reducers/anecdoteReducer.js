@@ -21,6 +21,8 @@ const initialState = anecdotesAtStart.map(asObject)
 
 // Action Types
 const INCREMENT_VOTE = 'INCREMENT_VOTE';
+const ADD_ANECDOTE = 'ADD_ANECDOTE';
+
 
 // Reducer
 const reducer = (state = initialState, action) => {
@@ -29,6 +31,8 @@ const reducer = (state = initialState, action) => {
       return state.map(anecdote =>
         anecdote.id !== action.id ? anecdote : { ...anecdote, votes: anecdote.votes + 1 }
       );
+    case ADD_ANECDOTE:
+      return [...state, action.data];
     default: 
       return state;
   }
@@ -41,5 +45,16 @@ export const incrementVote = (id) => {
   return {
     type: INCREMENT_VOTE,
     id
+  };
+};
+
+export const addAnecdote = (content) => {
+  return {
+    type: ADD_ANECDOTE,
+    data: {
+      content,
+      id: getId(),
+      votes: 0
+    }
   };
 };

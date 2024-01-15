@@ -1,36 +1,14 @@
-import { useSelector, useDispatch } from 'react-redux'
-import { incrementVote } from './reducers/anecdoteReducer'; // Import the action creator
+// App.jsx
+import AnecdoteForm from './components/AnecdoteForm';
+import AnecdoteList from './components/AnecdoteList'; // Import the new component
 
 const App = () => {
-  const anecdotes = useSelector(state => state); //this breaks the application
-  const dispatch = useDispatch()
-
-  const vote = (id) => {
-    console.log('vote', id)
-    dispatch(incrementVote(id)); // Dispatch the action
-  }
-
   return (
     <div>
-      <h2>Anecdotes</h2>
-      {anecdotes.map(anecdote => (
-        <div key={anecdote.id}>
-          <div>
-            {anecdote.content}
-          </div>
-          <div>
-            has {anecdote.votes}
-            <button onClick={() => vote(anecdote.id)}>vote</button>
-          </div>
-        </div>
-      ))}
-      <h2>create new</h2>
-      <form>
-        <div><input /></div>
-        <button>create</button>
-      </form>
+      <AnecdoteList /> {/* Use the AnecdoteList component */}
+      <AnecdoteForm />
     </div>
-  )
-}
+  );
+};
 
-export default App
+export default App;
