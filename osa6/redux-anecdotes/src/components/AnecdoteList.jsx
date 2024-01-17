@@ -1,18 +1,14 @@
 // AnecdoteList.jsx
 import { useSelector, useDispatch } from 'react-redux';
 import { incrementVote } from '../reducers/anecdoteReducer'; // Adjust the path as necessary
-import { setFilter } from '../reducers/filterReducer'; // Import setFilter action creator
+import Filter from './Filter'; // Import the Filter component
+
 
 
 const AnecdoteList = () => {
   const anecdotes = useSelector(state => state.anecdotes);
   const filter = useSelector(state => state.filter); // Get the current filter state
   const dispatch = useDispatch();
-
-
-  const handleFilterChange = (event) => {
-    dispatch(setFilter(event.target.value)); // Update the filter state when the input changes
-  };
 
  const sortedAnecdotes = [...anecdotes]
     .filter(anecdote => 
@@ -27,15 +23,7 @@ const AnecdoteList = () => {
   return (
     <div>
       <h2>Anecdotes</h2>
-      <div>
-        <input 
-          type="text" 
-          name="filter" 
-          value={filter} 
-          onChange={handleFilterChange} 
-          placeholder="Filter anecdotes" 
-        />
-      </div>
+      <Filter />
       {sortedAnecdotes.map(anecdote => (
         <div key={anecdote.id}>
           <div>{anecdote.content}</div>
