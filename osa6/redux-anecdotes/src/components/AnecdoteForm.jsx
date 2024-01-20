@@ -1,21 +1,22 @@
 // AnecdoteForm.jsx
 import { useDispatch } from 'react-redux';
-import { addAnecdote } from '../reducers/anecdoteReducer'; // Adjust the path as necessary
+import { addNewAnecdote } from '../reducers/anecdoteReducer';
 
 const AnecdoteForm = () => {
   const dispatch = useDispatch();
 
-  const addNewAnecdote = (event) => {
-    event.preventDefault();
-    const content = event.target.anecdote.value;
-    dispatch(addAnecdote(content));
-    event.target.anecdote.value = '';
-  };
+ // AnecdoteForm.jsx
+const addNewAnecdoteHandler = async (event) => {
+  event.preventDefault();
+  const content = event.target.anecdote.value;
+  event.target.anecdote.value = '';
+  dispatch(addNewAnecdote(content)); // This dispatches the async thunk
+};
 
   return (
     <div>
       <h2>create new</h2>
-      <form onSubmit={addNewAnecdote}>
+      <form onSubmit={addNewAnecdoteHandler}>
         <input name="anecdote" />
         <button type="submit">create</button>
       </form>

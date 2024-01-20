@@ -1,53 +1,51 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import anecdoteService from '../services/anecdotes';
 
-const anecdotesAtStart = [
-  'If it hurts, do it more often',
-  'Adding manpower to a late software project makes it later!',
-  'The first 90 percent of the code accounts for the first 90 percent of the development time...The remaining 10 percent of the code accounts for the other 90 percent of the development time.',
-  'Any fool can write code that a computer can understand. Good programmers write code that humans can understand.',
-  'Premature optimization is the root of all evil.',
-  'Debugging is twice as hard as writing the code in the first place. Therefore, if you write the code as cleverly as possible, you are, by definition, not smart enough to debug it.'
-]
-
-const getId = () => (100000 * Math.random()).toFixed(0)
-
-const asObject = (anecdote) => {
-  return {
-    content: anecdote,
-    id: getId(),
-    votes: 0
+// Async thunk for initializing anecdotes
+export const initializeAnecdotes = createAsyncThunk(
+  'anecdotes/initializeAnecdotes',
+  async () => {
+    const anecdotes = await anecdoteService.getAll();
+    return anecdotes;
   }
-}
+);
 
-const initialState = anecdotesAtStart.map(asObject)
+// Async thunk for adding a new anecdote
+export const addNewAnecdote = createAsyncThunk(
+  'anecdotes/addNewAnecdote',
+  async (content) => {
+    const newAnecdote = await anecdoteService.createNew(content);
+    return newAnecdote;
+  }
+);
 
 const anecdoteSlice = createSlice({
   name: 'anecdotes',
-  initialState,
+  initialState: [], // Initial state is empty or fetched asynchronously
   reducers: {
+    // Reducer for incrementing votes
     incrementVote: (state, action) => {
       const id = action.payload;
       const anecdoteToChange = state.find(anecdote => anecdote.id === id);
       if (anecdoteToChange) {
         anecdoteToChange.votes += 1;
       }
-      console.log(JSON.parse(JSON.stringify(state)))
-      
     },
-    addAnecdote: {
-      reducer: (state, action) => {
+    // Additional reducers can be added here
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(addNewAnecdote.fulfilled, (state, action) => {
         state.push(action.payload);
-      },
-      prepare: (content) => ({
-        payload: {
-          content,
-          id: getId(),
-          votes: 0
-        }
       })
-    }
-  }
+      .addCase(initializeAnecdotes.fulfilled, (state, action) => {
+        return action.payload;
+      });
+  },
 });
 
-export const { incrementVote, addAnecdote } = anecdoteSlice.actions;
+// Export the action creators from the slice
+export const { incrementVote } = anecdoteSlice.actions;
+
+// Export the reducer
 export default anecdoteSlice.reducer;
