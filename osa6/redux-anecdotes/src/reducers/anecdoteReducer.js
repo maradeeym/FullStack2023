@@ -1,51 +1,43 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import anecdoteService from '../services/anecdotes';
 
-// Async thunk for initializing anecdotes
 export const initializeAnecdotes = createAsyncThunk(
   'anecdotes/initializeAnecdotes',
-  async () => {
-    const anecdotes = await anecdoteService.getAll();
-    return anecdotes;
-  }
+  async () => await anecdoteService.getAll()
 );
 
-// Async thunk for adding a new anecdote
 export const addNewAnecdote = createAsyncThunk(
   'anecdotes/addNewAnecdote',
-  async (content) => {
-    const newAnecdote = await anecdoteService.createNew(content);
-    return newAnecdote;
+  async (content) => await anecdoteService.createNew(content)
+);
+
+export const voteAnecdote = createAsyncThunk(
+  'anecdotes/voteAnecdote',
+  async (anecdote) => {
+    const updatedAnecdote = {...anecdote, votes: anecdote.votes + 1};
+    return await anecdoteService.update(anecdote.id, updatedAnecdote);
   }
 );
 
 const anecdoteSlice = createSlice({
   name: 'anecdotes',
-  initialState: [], // Initial state is empty or fetched asynchronously
+  initialState: [],
   reducers: {
-    // Reducer for incrementing votes
-    incrementVote: (state, action) => {
-      const id = action.payload;
-      const anecdoteToChange = state.find(anecdote => anecdote.id === id);
-      if (anecdoteToChange) {
-        anecdoteToChange.votes += 1;
-      }
-    },
-    // Additional reducers can be added here
+    // Reducers if needed
   },
   extraReducers: (builder) => {
     builder
+      .addCase(initializeAnecdotes.fulfilled, (state, action) => action.payload)
       .addCase(addNewAnecdote.fulfilled, (state, action) => {
         state.push(action.payload);
       })
-      .addCase(initializeAnecdotes.fulfilled, (state, action) => {
-        return action.payload;
+      .addCase(voteAnecdote.fulfilled, (state, action) => {
+        const index = state.findIndex(a => a.id === action.payload.id);
+        if (index !== -1) {
+          state[index] = action.payload;
+        }
       });
   },
 });
 
-// Export the action creators from the slice
-export const { incrementVote } = anecdoteSlice.actions;
-
-// Export the reducer
 export default anecdoteSlice.reducer;
