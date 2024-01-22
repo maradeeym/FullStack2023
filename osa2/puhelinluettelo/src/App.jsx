@@ -30,6 +30,15 @@ const App = () => {
 //this sends the data when the button is clicked
 const addNote = (event) => {
   event.preventDefault();
+   // Validation for name and number length
+   if (newName.length < 3 || newNumber.length < 3) {
+    setAddMessageType('error');
+    setAddMessage('Name and number must be at least 3 characters long.');
+    setTimeout(() => {
+      setAddMessage(null);
+    }, 5000);
+    return; // Stop the function if validation fails
+  }
   const personWithSameName = persons.find(p => p.name === newName);
   const newPerson = {
     name: newName,
